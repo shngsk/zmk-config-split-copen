@@ -52,7 +52,7 @@
         reg = <0>;
         spi-max-frequency = <2000000>;
         motion-gpios = <&gpio0 2 GPIO_ACTIVE_LOW>; //P0.02を指定(MOTION) - 追加
-        zephyr,cpi = <600>;
+        //zephyr,cpi = <600>;
         zephyr,axis-x = <INPUT_REL_X>;  // X軸の定義
         zephyr,axis-y = <INPUT_REL_Y>;  // Y軸の定義
         //swap-xy;
