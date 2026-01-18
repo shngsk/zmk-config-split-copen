@@ -9,6 +9,13 @@ manifest:
   projects:
     - name: zmk
       remote: zmkfirmware
+      revision: main
       import: app/west.yml
+    - name: zmk-pmw3610-driver
+      remote: shngsk
+      revision: main
+    - name: zmk-rgbled-widget // 追記
+      remote: caksoylar
+      revision: main
   self:
     path: config
