@@ -1,3 +1,5 @@
+name: zmk-keyboard-copen
+
 build:
   settings:
     board_root: .
