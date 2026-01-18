@@ -5,7 +5,7 @@ manifest:
     - name: zmkfirmware
       url-base: https://github.com/zmkfirmware
     - name: shngsk
-      url-base: https://github.com/
+      url-base: https://github.com/shngsk
     - name: caksoylar
       url-base: https://github.com/caksoylar
     # Additional modules containing boards/shields/custom code can be listed here as well
