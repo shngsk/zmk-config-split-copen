@@ -1,2 +1,6 @@
 
 .zmk/
+
+.DS_Store
+*-backups/
+fp-info-cache
