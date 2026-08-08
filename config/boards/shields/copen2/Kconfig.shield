@@ -1,0 +1,5 @@
+config SHIELD_COPEN2_R
+    def_bool $(shields_list_contains,copen2_R)
+
+config SHIELD_COPEN2_L
+    def_bool $(shields_list_contains,copen2_L)

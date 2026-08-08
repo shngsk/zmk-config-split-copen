@@ -1,0 +1,29 @@
+if SHIELD_COPEN2_R
+
+config ZMK_KEYBOARD_NAME
+    default "copen2_R"
+
+config ZMK_SPLIT
+    default y
+
+config ZMK_SPLIT_ROLE_CENTRAL
+    default y
+
+config ZMK_POINTING
+    default y
+
+# Assuming pointing device uses SPI
+config SPI
+    default y
+
+endif
+
+if SHIELD_COPEN2_L
+
+config ZMK_KEYBOARD_NAME
+    default "copen2_L"
+
+config ZMK_SPLIT
+    default y
+
+endif
