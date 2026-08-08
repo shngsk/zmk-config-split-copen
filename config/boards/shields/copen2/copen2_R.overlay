@@ -1,4 +1,5 @@
 #include "copen2.dtsi"
+#include <zephyr/dt-bindings/input/input-event-codes.h>
 
 &default_transform {
     col-offset = <6>;
@@ -7,10 +8,10 @@
 &kscan0 {
         col-gpios
             = <&xiao_d 7 GPIO_ACTIVE_HIGH>
-            , <&xiao_d 8 GPIO_ACTIVE_HIGH> 
-            , <&xiao_d 9 GPIO_ACTIVE_HIGH> 
-            , <&xiao_d 10 GPIO_ACTIVE_HIGH> 
-            , <&gpio0 10 GPIO_ACTIVE_HIGH> 
+            , <&xiao_d 8 GPIO_ACTIVE_HIGH>
+            , <&xiao_d 9 GPIO_ACTIVE_HIGH>
+            , <&xiao_d 10 GPIO_ACTIVE_HIGH>
+            , <&gpio0 10 GPIO_ACTIVE_HIGH>
             // , <&gpio0 9 GPIO_ACTIVE_HIGH>
             ;
 };
@@ -50,10 +51,9 @@
         reg = <0>;
         spi-max-frequency = <2000000>;
         motion-gpios = <&xiao_d 0 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>; //MOT
-
-        // snipe-layers = <3>;
-        // scroll-layers = <4 5 6>;
-        // automouse-layer = <2>;
+        zephyr,cpi = <400>;
+        zephyr,axis-x = <INPUT_REL_X>;
+        zephyr,axis-y = <INPUT_REL_Y>;
     };
 };
 
@@ -61,4 +61,3 @@
     status = "okay";
     device = <&trackball>;
 };
-
