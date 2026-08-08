@@ -2,6 +2,13 @@
 #include <input/processors.dtsi>
 #include <zephyr/dt-bindings/input/input-event-codes.h>
 
+/ {
+    aliases {
+        led-red = &led0;
+        led-green = &led1;
+        led-blue = &led2;
+    };
+};
 
 &default_transform {
     col-offset = <6>;
