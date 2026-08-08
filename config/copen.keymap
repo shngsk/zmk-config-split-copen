@@ -24,11 +24,6 @@
     combos {
         compatible = "zmk,combos";
 
-        layer4_ESC {
-            bindings = <&lt 4 ESC>;
-            key-positions = <39 38>;
-        };
-
         tab {
             bindings = <&kp TAB>;
             key-positions = <11 12>;
@@ -74,39 +69,49 @@
     keymap {
         compatible = "zmk,keymap";
 
+        // Layer 0: QWERTY base
+        // Combos: S+D=Tab
+        // F16 thumb: tap=ESC, hold=Layer4
         default_layer {
             bindings = <
-&kp Q             &kp W         &kp E    &kp R          &kp T                                                          &kp Y        &kp U  &kp I      &kp O    &kp P
-&kp A             &kp S         &kp D    &kp F          &kp G                                  &kp F13                 &kp H        &kp J  &kp K      &kp L    &kp SEMICOLON
-&mt LEFT_SHIFT Z  &kp X         &kp C    &kp V          &kp B        &kp F14                   &kp F15                 &kp N        &kp M  &kp COMMA  &kp DOT  &kp SLASH
-&kp LCTRL         &kp LEFT_WIN  &kp F16  &kp BACKSPACE  &lt 2 ENTER  &lt_to_layer_0 3 LANG2    &lt_to_layer_0 3 LANG1  &lt 1 SPACE                             &kp LEFT_ALT
+&kp Q             &kp W         &kp E      &kp R          &kp T                                                          &kp Y        &kp U  &kp I      &kp O    &kp P
+&kp A             &kp S         &kp D      &kp F          &kp G                                  &kp F13                 &kp H        &kp J  &kp K      &kp L    &kp SEMICOLON
+&mt LEFT_SHIFT Z  &kp X         &kp C      &kp V          &kp B        &kp F14                   &kp F15                 &kp N        &kp M  &kp COMMA  &kp DOT  &kp SLASH
+&kp LCTRL         &kp LEFT_WIN  &lt 4 ESC  &kp BACKSPACE  &lt 2 ENTER  &lt_to_layer_0 3 LANG2    &lt_to_layer_0 3 LANG1  &lt 1 SPACE                             &kp LEFT_ALT
             >;
 
             sensor-bindings = <&scroll_up_down>;
         };
 
+        // Layer 1: テンキー(右手) + Fキー(左手)
+        // DEL = このレイヤー中に BS タップ
         layer_1 {
             bindings = <
-&kp NUMBER_1  &kp NUMBER_2  &kp NUMBER_3      &kp NUMBER_4       &kp NUMBER_5                    &kp NUMBER_6  &kp NUMBER_7          &kp NUMBER_8           &kp NUMBER_9  &kp NUMBER_0
-&trans        &trans        &kp LEFT_BRACKET  &kp RIGHT_BRACKET  &trans                  &trans  &trans        &kp LEFT_PARENTHESIS  &kp RIGHT_PARENTHESIS  &trans        &kp BACKSLASH
-&trans        &trans        &trans            &trans             &trans        &trans    &trans  &trans        &trans                &trans                 &trans        &kp PIPE
-&trans        &trans        &trans            &trans             &trans        &trans    &trans  &trans                                                                   &trans
+&kp F1   &kp F2   &kp F3  &kp F4  &kp F5                     &trans        &kp NUMBER_7  &kp NUMBER_8  &kp NUMBER_9  &trans
+&kp F6   &kp F7   &kp F8  &kp F9  &kp F10         &trans      &kp NUMBER_0  &kp NUMBER_4  &kp NUMBER_5  &kp NUMBER_6  &trans
+&kp F11  &kp F12  &trans  &trans  &trans  &trans   &trans      &trans        &kp NUMBER_1  &kp NUMBER_2  &kp NUMBER_3  &trans
+&trans   &trans   &trans  &kp DEL &trans  &trans               &trans                                                  &trans
             >;
 
             sensor-bindings = <&scroll_right_left>;
         };
 
+        // Layer 2: ニーモニック記号
+        // @=A[a]t  !=E[e]xcl  "=W[w]quot  #=H[h]ash  $=D[d]ollar
+        // %=P[p]ct  &=N[n]and  '=Q[q]uot  ¥=Y[y]en  \=B[b]slash
+        // ;=S[s]emi  :=C[c]olon  ~=T[t]ilde  `=G[g]rave  |=V[v]ert
         layer_2 {
             bindings = <
-&kp EXCLAMATION  &kp AT_SIGN  &kp POUND          &kp DOLLAR  &kp PERCENT                      &kp CARET  &kp AMPERSAND  &kp ASTERISK  &kp MINUS  &kp UNDERSCORE
-&kp GRAVE        &kp TILDE    &kp DOUBLE_QUOTES  &kp SQT     &trans                  &trans   &mkp MB3   &mkp MB1       &mkp MB2      &kp EQUAL  &kp PLUS
-&kp F1           &kp F2       &kp F3             &kp F4      &kp F5       &kp F11    &kp F12  &kp F6     &kp F7         &kp F8        &kp F9     &kp F10
-&trans           &trans       &trans             &trans      &trans       &trans     &trans   &trans                                             &trans
+&kp SQT  &kp DQT    &kp EXCL    &trans      &kp TILDE                      &kp INT3   &kp LPAR  &kp RPAR  &kp MINUS  &kp PERCENT
+&kp AT   &kp SEMI   &kp DOLLAR  &kp EQUAL   &kp GRAVE          &trans      &kp HASH   &kp LBKT  &kp RBKT  &kp PLUS   &kp STAR
+&trans   &kp CARET  &kp COLON   &kp PIPE    &kp BSLH   &trans  &trans      &kp AMPS   &kp LBRC  &kp RBRC  &kp UNDER  &trans
+&trans   &trans     &trans      &trans      &trans     &trans  &trans      &trans                          &trans
             >;
 
             sensor-bindings = <&scroll_up_down>;
         };
 
+        // Layer 3: ナビ・ウィンドウ操作(Mac)
         layer_3 {
             bindings = <
 &trans  &kp LC(LS(TAB))     &kp PRINTSCREEN         &kp LC(TAB)              &trans                                     &trans  &kp HOME        &kp UP_ARROW    &kp END          &trans
@@ -118,6 +123,7 @@
             sensor-bindings = <&inc_dec_kp C_VOL_DN C_VOL_UP>;
         };
 
+        // Layer 4: BT・システム (ESC ホールドで起動)
         layer_4 {
             bindings = <
 &trans  &trans  &trans  &trans  &trans                         &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4
