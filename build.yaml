@@ -1,9 +1,9 @@
 ---
 include:
-  - board: xiao_ble
+  - board: xiao_ble//zmk
     shield: copen2_R
-    # snippet: studio-rpc-usb-uart  # disabled for minimal BLE test
-  - board: xiao_ble
+    snippet: studio-rpc-usb-uart
+  - board: xiao_ble//zmk
     shield: copen2_L
-  - board: xiao_ble
+  - board: xiao_ble//zmk
     shield: settings_reset
