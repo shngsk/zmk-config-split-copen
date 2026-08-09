@@ -9,6 +9,7 @@ GitHub Actions でビルドし、`.uf2` をダウンロードしてフラッシ�
 
 - **ボード**: `xiao_ble`（Seeeduino XIAO BLE）
   - ⚠️ `seeeduino_xiao_ble` は ZMK v0.3 では無効。`xiao_ble` を使うこと。
+  - ⚠️ `xiao_ble//zmk` 修飾子はCI失敗する（→ 下記「NVS/BLE永続化」参照）
 - **ビルド**: `.github/workflows/build.yml` → ZMK reusable workflow `@v0.3`
 - **設定**: `build.yaml`（copen2_R, copen2_L, settings_reset）
 
@@ -41,6 +42,44 @@ zephyr,axis-y = <INPUT_REL_Y>;
 
 `copen2_R.conf` に `CONFIG_PMW3610_*` は書かない（shngsk ドライバー固有のため）。
 `config/west.yml` に `zmk-pmw3610-driver` は残してあるが、Kconfig では有効化していない。
+
+## NVS / BLE ボンド永続化（重要）
+
+### 問題
+`xiao_ble` を `build.yaml` で指定した場合、`xiao_ble_zmk_defconfig` が読み込まれず NVS が無効になる。
+BLE のボンド情報（LTK）がフラッシュに書き込まれないため、**電源オフ→オンで BLE 再接続失敗**する。
+
+### なぜ `xiao_ble//zmk` を使わないのか
+`xiao_ble//zmk` 修飾子は `CONFIG_HW_STACK_PROTECTION=y` を有効化し、ZMK v0.3 の CI が
+`CONFIG_RUNTIME_ERROR_CHECKS=y` によってビルドエラーを出す。
+
+### 対処方法（採用済み）
+`build.yaml` は `xiao_ble` のまま維持し、`xiao_ble_zmk_defconfig` の内容を
+`copen2_R.conf` に手動でコピーする（`CONFIG_HW_STACK_PROTECTION` のみ除外）。
+
+`copen2_R.conf` に追加した NVS 関連設定:
+```conf
+CONFIG_SETTINGS=y
+CONFIG_MPU_ALLOW_FLASH_WRITE=y
+CONFIG_NVS=y
+CONFIG_SETTINGS_NVS=y
+CONFIG_FLASH=y
+CONFIG_FLASH_PAGE_LAYOUT=y
+CONFIG_FLASH_MAP=y
+CONFIG_USE_DT_CODE_PARTITION=y
+CONFIG_RETAINED_MEM=y
+CONFIG_RETENTION=y
+CONFIG_RETENTION_BOOT_MODE=y
+CONFIG_ZMK_BOOTMODE_MAGIC_VALUE_BOOTLOADER_TYPE_ADAFRUIT_NRF52=y
+```
+
+### BLE 接続失敗時のリセット手順
+1. `settings_reset.uf2` を両側にフラッシュ（ボンド情報クリア）
+2. `copen2_R.uf2` → `copen2_L.uf2` の順でフラッシュ
+3. PC の BT 設定から copen2 を削除 → 新規ペアリング
+4. 電源オフ→オンで自動再接続を確認
+
+---
 
 ## west.yml
 
