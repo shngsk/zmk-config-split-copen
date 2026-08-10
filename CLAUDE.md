@@ -69,6 +69,14 @@ BLE のボンド情報（LTK）がフラッシュに書き込まれないため�
 CONFIG_HW_STACK_PROTECTION=n
 ```
 
+### 動作確認済み（2026-08-10）
+`xiao_ble//zmk` 切り替え後、右手(copen2_R)でBLE接続不可になる事象が発生したが、
+下記「BLE接続失敗時のリセット手順」（`settings_reset.uf2`書き込み＋PC側の古いペアリング削除）
+で解消し、**電源オフ→オンでの自動再接続も実機で確認できた**。
+これは新しいパーティションレイアウトと整合しない古いボンド情報が残っていたためと推測される。
+今後 `xiao_ble//zmk` 関連でパーティション定義が変わるような変更（west.yml更新等）を行った際は、
+念のため両手に `settings_reset.uf2` を書き込んでからペアリングし直すこと。
+
 ### build.yaml の `artifact-name` が必須な理由
 ZMK reusable workflow `@v0.3`（`build-user-config.yml`）には、board名に含まれる
 `/` をそのままアーティファクトのファイルパスに使ってしまうバグがある
