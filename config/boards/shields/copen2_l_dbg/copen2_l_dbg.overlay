@@ -1,0 +1,7 @@
+/*
+ * Diagnostic-only shield: intentionally contributes no devicetree changes.
+ * Combine with the "copen2_L" shield in build.yaml; this shield only adds
+ * Kconfig via copen2_l_dbg.conf (USB + debug logging), so left-half kscan
+ * activity can be observed over USB CDC ACM without needing a BLE central
+ * connection. See TODO.md for usage instructions.
+ */

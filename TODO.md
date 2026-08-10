@@ -21,12 +21,29 @@
     - ダイオードの向き・破損
     - XIAO BLE 本体のはんだ付け（GPIOピンの浮き）
     - テスターで導通チェック（キー押下時に該当row-col間が導通するか）
-  - ハード面で切り分けが難しい場合の追加手段（未実施・要検討）:
-    - L側を一時的に `CONFIG_ZMK_USB=y` + `CONFIG_ZMK_USB_LOGGING=y` 等でUSBシリアル
-      ログを有効化したデバッグビルドを作り、USB給電しながらキー入力時に
-      row/col イベントがログに出るか確認する（BLEペリフェラル接続の成否と切り離して
-      kscan単体の生死を確認できる）。Kconfigオプション名は要検証（ローカルにZMKソース
-      が無く未確認のため、試す場合は個別ブランチでCI結果を見ながら調整すること）。
+  - **2026-08-10: USBシリアルログでのハード切り分け用ビルドを追加**
+    （`build.yaml` に `copen2_L_dbg` として追加、CI自動ビルド）。
+    - shield `copen2_l_dbg`（`config/boards/shields/copen2_l_dbg/`）を通常の
+      `copen2_L` と組み合わせてビルド。devicetreeは変更せず、Kconfigのみ
+      `CONFIG_ZMK_USB=y` + `CONFIG_ZMK_USB_LOGGING=y` + `CONFIG_LOG_DEFAULT_LEVEL=4`
+      を追加し、USB CDC ACM経由でログコンソールを有効化。BLE/central接続は不要。
+    - **使い方**:
+      1. GitHub Actions の Artifacts から `copen2_L_dbg-xiao_ble-zmk` (uf2) を
+         ダウンロードし、L側にフラッシュ（通常のフラッシュ手順と同じ）。
+      2. データ通信対応のUSB-CケーブルでPCとL側を接続。
+      3. シリアルターミナルで接続（Mac: `screen /dev/tty.usbmodemXXXX 115200`、
+         Windows: PuTTY/TeraTermでUSB CDC ACMのCOMポートを開く）。
+      4. 起動ログが出るか確認 → 出ればUSB/書き込み自体はOK。
+      5. キースイッチを1個ずつ押し、押すたびにログへ反応（row/col関連イベント）が
+         出るか確認。
+         - 反応が出る → kscanハードは生きている。原因はBLE/central接続側に絞れる。
+         - 起動ログは出るがキー押下に無反応 → 配線/ダイオード/はんだ不良の可能性大。
+         - 起動ログすら出ない → USB接続/書き込み自体の問題を疑う。
+      6. 診断が終わったら通常運用の `copen2_L.uf2` に書き戻すこと（このビルドは
+         BLEに繋がらないため通常使用不可）。
+    - ⚠️ Kconfigオプション名（`CONFIG_ZMK_USB_LOGGING` 等）はローカルにZMKソースが
+      無く未検証。初回CIビルドが失敗する場合は、CIログのKconfig警告/エラーを見て
+      `copen2_l_dbg.conf` を調整する必要あり。
 
 ## 完了
 

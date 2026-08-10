@@ -10,3 +10,8 @@ include:
   - board: xiao_ble//zmk
     shield: settings_reset
     artifact-name: settings_reset-xiao_ble-zmk
+  # Diagnostic-only: left half kscan check over USB serial, no BLE needed.
+  # See TODO.md "左手デバイス" entry for usage instructions.
+  - board: xiao_ble//zmk
+    shield: copen2_L copen2_l_dbg
+    artifact-name: copen2_L_dbg-xiao_ble-zmk
