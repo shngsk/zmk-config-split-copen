@@ -7,9 +7,15 @@ GitHub Actions でビルドし、`.uf2` をダウンロードしてフラッシ�
 
 ## ビルド環境
 
-- **ボード**: `xiao_ble`（Seeeduino XIAO BLE）
+- **ボード**: `xiao_ble//zmk`（Seeeduino XIAO BLE、`zmk` ボード修飾子付き）
   - ⚠️ `seeeduino_xiao_ble` は ZMK v0.3 では無効。`xiao_ble` を使うこと。
-  - ⚠️ `xiao_ble//zmk` 修飾子はCI失敗する（→ 下記「NVS/BLE永続化」参照）
+  - `xiao_ble//zmk` 修飾子自体はビルド可能（NVS/設定パーティション定義を持つ）。
+    ZMK公式Discordの助言により採用（→ 下記「NVS/BLE永続化」参照）。
+  - ⚠️ `build.yaml` で `xiao_ble//zmk` を使う場合、各エントリに `artifact-name:` を
+    明示指定すること。ZMK reusable workflow `@v0.3` の `build-user-config.yml` には
+    board名の `/` をそのままファイルパスに使ってしまうバグがあり（`main`ブランチでは
+    `${board//\//_}` で修正済みだが、v0.3時点では未リリース）、`artifact-name` を
+    指定しないと成果物コピー時に `cp: cannot create regular file` で CI が失敗する。
 - **ビルド**: `.github/workflows/build.yml` → ZMK reusable workflow `@v0.3`
 - **設定**: `build.yaml`（copen2_R, copen2_L, settings_reset）
 
@@ -46,31 +52,51 @@ zephyr,axis-y = <INPUT_REL_Y>;
 ## NVS / BLE ボンド永続化（重要）
 
 ### 問題
-`xiao_ble` を `build.yaml` で指定した場合、`xiao_ble_zmk_defconfig` が読み込まれず NVS が無効になる。
+`xiao_ble` を `build.yaml` で単体指定した場合、`xiao_ble_zmk_defconfig` が読み込まれず NVS が無効になる。
 BLE のボンド情報（LTK）がフラッシュに書き込まれないため、**電源オフ→オンで BLE 再接続失敗**する。
 
-### なぜ `xiao_ble//zmk` を使わないのか
-`xiao_ble//zmk` 修飾子は `CONFIG_HW_STACK_PROTECTION=y` を有効化し、ZMK v0.3 の CI が
-`CONFIG_RUNTIME_ERROR_CHECKS=y` によってビルドエラーを出す。
+### 対処方法（採用済み・2026-08〜）
+`build.yaml` で `xiao_ble//zmk` を指定する（`zmk` ボード修飾子）。これにより
+`xiao_ble_zmk_defconfig`相当のNVS/設定パーティション定義が自動的に適用される。
+以前は「`xiao_ble//zmk` はCIビルドエラーになる」として `xiao_ble` 単体+手動conf
+コピーの方式を採っていたが、ZMK公式Discordの助言と実際の検証の結果、
+`xiao_ble//zmk` 自体は正常にビルドできることを確認したため方針転換した。
 
-### 対処方法（採用済み）
-`build.yaml` は `xiao_ble` のまま維持し、`xiao_ble_zmk_defconfig` の内容を
-`copen2_R.conf` に手動でコピーする（`CONFIG_HW_STACK_PROTECTION` のみ除外）。
-
-`copen2_R.conf` に追加した NVS 関連設定:
+`xiao_ble//zmk` は `CONFIG_HW_STACK_PROTECTION=y` を有効化するが、これが
+`CONFIG_RUNTIME_ERROR_CHECKS=y` 経由でCIビルドエラーを招く問題は、
+`copen2_R.conf` / `copen2_L.conf` に以下を明示することで回避済み:
 ```conf
-CONFIG_SETTINGS=y
-CONFIG_MPU_ALLOW_FLASH_WRITE=y
-CONFIG_NVS=y
-CONFIG_SETTINGS_NVS=y
-CONFIG_FLASH=y
-CONFIG_FLASH_PAGE_LAYOUT=y
-CONFIG_FLASH_MAP=y
-CONFIG_USE_DT_CODE_PARTITION=y
-CONFIG_RETAINED_MEM=y
-CONFIG_RETENTION=y
-CONFIG_RETENTION_BOOT_MODE=y
-CONFIG_ZMK_BOOTMODE_MAGIC_VALUE_BOOTLOADER_TYPE_ADAFRUIT_NRF52=y
+CONFIG_HW_STACK_PROTECTION=n
+```
+
+### 動作確認済み（2026-08-10）
+`xiao_ble//zmk` 切り替え後、右手(copen2_R)でBLE接続不可になる事象が発生したが、
+下記「BLE接続失敗時のリセット手順」（`settings_reset.uf2`書き込み＋PC側の古いペアリング削除）
+で解消し、**電源オフ→オンでの自動再接続も実機で確認できた**。
+これは新しいパーティションレイアウトと整合しない古いボンド情報が残っていたためと推測される。
+今後 `xiao_ble//zmk` 関連でパーティション定義が変わるような変更（west.yml更新等）を行った際は、
+念のため両手に `settings_reset.uf2` を書き込んでからペアリングし直すこと。
+
+### build.yaml の `artifact-name` が必須な理由
+ZMK reusable workflow `@v0.3`（`build-user-config.yml`）には、board名に含まれる
+`/` をそのままアーティファクトのファイルパスに使ってしまうバグがある
+（`main`ブランチでは `${board//\//_}` として修正済みだが、v0.3時点では未リリース。
+2026-08時点でのリリースタグはv0.1〜v0.3のみ）。
+`board: xiao_ble//zmk` をそのまま使うと成果物コピー時に
+`cp: cannot create regular file '...xiao_ble//zmk-zmk.uf2': No such file or directory`
+でCIが失敗するため、`build.yaml` の各エントリに `artifact-name:` を明示指定してこれを回避する:
+```yaml
+include:
+  - board: xiao_ble//zmk
+    shield: copen2_R
+    snippet: studio-rpc-usb-uart
+    artifact-name: copen2_R-xiao_ble-zmk
+  - board: xiao_ble//zmk
+    shield: copen2_L
+    artifact-name: copen2_L-xiao_ble-zmk
+  - board: xiao_ble//zmk
+    shield: settings_reset
+    artifact-name: settings_reset-xiao_ble-zmk
 ```
 
 ### BLE 接続失敗時のリセット手順
