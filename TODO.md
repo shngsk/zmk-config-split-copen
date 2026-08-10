@@ -21,12 +21,19 @@
     - ダイオードの向き・破損
     - XIAO BLE 本体のはんだ付け（GPIOピンの浮き）
     - テスターで導通チェック（キー押下時に該当row-col間が導通するか）
-  - **2026-08-10: USBシリアルログでのハード切り分け用ビルドを追加**
-    （`build.yaml` に `copen2_L_dbg` として追加、CI自動ビルド）。
+  - **2026-08-10: USBシリアルログでのハード切り分け用ビルドを追加・CI検証済み**
+    （`build.yaml` に `copen2_L_dbg` として追加、CI自動ビルド成功）。
     - shield `copen2_l_dbg`（`config/boards/shields/copen2_l_dbg/`）を通常の
       `copen2_L` と組み合わせてビルド。devicetreeは変更せず、Kconfigのみ
-      `CONFIG_ZMK_USB=y` + `CONFIG_ZMK_USB_LOGGING=y` + `CONFIG_LOG_DEFAULT_LEVEL=4`
-      を追加し、USB CDC ACM経由でログコンソールを有効化。BLE/central接続は不要。
+      `CONFIG_ZMK_USB_LOGGING=y` + `CONFIG_LOG_DEFAULT_LEVEL=4` を追加し、
+      USB CDC ACM経由でログコンソールを有効化。BLE/central接続は不要。
+    - **CIビルドログで確認済みの注意点**: `CONFIG_ZMK_USB=y` はZMK本体のKconfig
+      制約（`depends on !ZMK_SPLIT || (ZMK_SPLIT && ZMK_SPLIT_ROLE_CENTRAL)`）
+      によりperipheralでは`n`に強制される（設定しても警告が出るだけで無効）ため、
+      この診断ビルドでもL側はUSBキーボードとしては機能しない。ただし
+      `CONFIG_ZMK_USB_LOGGING` は `CONFIG_USB_CDC_ACM` / `CONFIG_USB_DEVICE_STACK` /
+      `CONFIG_LOG_BACKEND_UART` を独立して有効化するため、シリアルログ出力自体は
+      正常に機能する（CIの`.config`ダンプで実際に有効化されていることを確認済み）。
     - **使い方**:
       1. GitHub Actions の Artifacts から `copen2_L_dbg-xiao_ble-zmk` (uf2) を
          ダウンロードし、L側にフラッシュ（通常のフラッシュ手順と同じ）。
@@ -40,10 +47,7 @@
          - 起動ログは出るがキー押下に無反応 → 配線/ダイオード/はんだ不良の可能性大。
          - 起動ログすら出ない → USB接続/書き込み自体の問題を疑う。
       6. 診断が終わったら通常運用の `copen2_L.uf2` に書き戻すこと（このビルドは
-         BLEに繋がらないため通常使用不可）。
-    - ⚠️ Kconfigオプション名（`CONFIG_ZMK_USB_LOGGING` 等）はローカルにZMKソースが
-      無く未検証。初回CIビルドが失敗する場合は、CIログのKconfig警告/エラーを見て
-      `copen2_l_dbg.conf` を調整する必要あり。
+         BLEにもUSBキーボードにもならないため通常使用不可）。
 
 ## 完了
 
