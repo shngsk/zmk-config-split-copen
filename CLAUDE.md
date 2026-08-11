@@ -141,3 +141,13 @@ projects:
 ## PCB
 
 `pcb/` 以下に KiCad プロジェクトを格納（ファームウェアとは独立）。
+
+## 既知の問題（進行中の調査）
+
+詳細・最新状況は `TODO.md` を参照。
+
+- **左手デバイス（copen2_L）が無反応**: ハードウェア・devicetree・BLEボンドは
+  いずれも正常と確認済み（`copen2_L_standalone` 診断ビルドで実機検証）。
+  原因は split peripheral(L) ↔ central(R) 間のBLE接続ロジックに絞り込み中。
+  診断用ビルド（`copen2_l_dbg`, `copen2_l_standalone`）が `build.yaml` に
+  追加してある（通常運用には使わないこと、検証後は `copen2_L.uf2` に戻す）。
