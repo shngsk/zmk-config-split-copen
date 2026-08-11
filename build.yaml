@@ -21,3 +21,8 @@ include:
   - board: xiao_ble//zmk
     shield: copen2_L copen2_l_standalone
     artifact-name: copen2_L_standalone-xiao_ble-zmk
+  # Diagnostic-only: right half (central) with USB CDC ACM logging.
+  # Omits studio-rpc-usb-uart to avoid CDC ACM conflict.
+  - board: xiao_ble//zmk
+    shield: copen2_R copen2_r_dbg
+    artifact-name: copen2_R_dbg-xiao_ble-zmk

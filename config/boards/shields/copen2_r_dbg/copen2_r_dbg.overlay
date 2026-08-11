@@ -1,0 +1,5 @@
+/*
+ * Diagnostic-only shield: no devicetree changes.
+ * Combine with "copen2_R" in build.yaml (without studio-rpc-usb-uart snippet).
+ * Adds USB CDC ACM logging to R so split central logs are visible.
+ */
