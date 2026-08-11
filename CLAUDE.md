@@ -146,8 +146,19 @@ projects:
 
 詳細・最新状況は `TODO.md` を参照。
 
-- **左手デバイス（copen2_L）が無反応**: ハードウェア・devicetree・BLEボンドは
-  いずれも正常と確認済み（`copen2_L_standalone` 診断ビルドで実機検証）。
-  原因は split peripheral(L) ↔ central(R) 間のBLE接続ロジックに絞り込み中。
-  診断用ビルド（`copen2_l_dbg`, `copen2_l_standalone`）が `build.yaml` に
-  追加してある（通常運用には使わないこと、検証後は `copen2_L.uf2` に戻す）。
+- **左手デバイス（copen2_L）が無反応**: 調査ブランチ `claude/left-hand-device-task-62r2xh`。
+  - ✅ L ハードウェア正常（`copen2_l_standalone` で確認）
+  - ✅ L-R BLE 接続は成立している（`copen2_l_dbg` シリアルログで確認）
+  - ✅ L の GATT notify は成功（`Error notifying -128` が出なくなった）
+  - ❌ **しかし PC でキーが認識されない** — R 側の処理に問題がある
+  - → **次のアクション**: `copen2_R_dbg` をフラッシュして R 側のログを確認
+
+### 診断用ビルド一覧（通常運用には使わないこと）
+
+| アーティファクト名 | 用途 |
+|---|---|
+| `copen2_L_dbg-xiao_ble-zmk` | L の USB シリアルログ確認（peripheral + CDC ACM） |
+| `copen2_L_standalone-xiao_ble-zmk` | L 単体 USB キーボード動作確認（ハード検証用、検証済み） |
+| `copen2_R_dbg-xiao_ble-zmk` | **次に使う**: R の USB シリアルログ確認（central + CDC ACM） |
+
+studio-rpc-usb-uart スニペットは `copen2_R_dbg` ビルドには含めない（CDC ACM と競合するため）。
