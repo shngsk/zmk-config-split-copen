@@ -63,10 +63,48 @@
       無関係な既知の問題→`cat`か`TERM=xterm screen`で回避。デバイスが
       `XIAO-SENSE`として見える場合はブートローダーモードなので、Finderで
       アンマウント→リセットボタンに触れずに挿し直せば通常起動する。）
-  - **次のアクション（未実施）**: マルチメーター（導通チェックモード）で
-    row-gpios（4本）× col-gpios（6本）の物理配線を確認。キー押下時に該当
-    row-col間が導通するか一つずつ検証。全キー無反応ならXIAO本体のはんだ/共通GND、
-    一部のみならその行・列のローカルな配線/ダイオード不良を疑う。
+  - **2026-08-10: 「ハードウェア確定」の結論が実験で覆り、ファームウェア調査に方針転換**
+    - ユーザーが `copen2_R.uf2`（右手用ファームウェア）を**物理的な左手基板**に
+      書き込んだところ、**いくつかのキーが反応した**。これは配線が全滅している
+      という説と矛盾する→ハードウェアは生きている可能性が高い。
+    - `zmkfirmware/zmk` 本体のソースを直接確認（`/workspace/zmkfirmware/zmk` に
+      クローン済み）:
+      - `app/src/physical_layouts.c` の `zmk_physical_layout_kscan_callback` で
+        キー押下は `LOG_DBG("Row: %d, col: %d, position: %d, pressed: %s", ...)`
+        としてログされるはず（`LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL)`）。
+      - `CONFIG_ZMK_LOG_LEVEL` はデフォルトで4(DEBUG)（`ZMK_LOGGING_MINIMAL=n`の場合）
+        であり、前回の`copen2_l_dbg`ビルドのCIログでも実際に`CONFIG_ZMK_LOG_LEVEL=4`
+        になっていたことを確認済み → **ログレベル設定ミスが原因ではなかった**
+        （一時的に疑ったが否定された）。
+      - `zmk_physical_layout_kscan_callback` には
+        `if (dev != active->kscan) return;`という無警告returnがあり理論上は
+        怪しいが、L/R共通コードなので単体では「Lだけ無反応」を説明しにくい。
+    - → **左手自身のkscanログ(peripheral構成)は無反応なのに、右手ファームウェア
+      (central構成)を同じ基板に書くと一部反応する**という矛盾が残っている。
+      ハードウェアの断線・はんだ不良を疑うフェーズは一旦保留し、
+      firmware/Kconfig側の切り分けを優先する方針に変更。
+  - **2026-08-10: 追加の診断ビルド `copen2_L_standalone` を用意（CI: 要確認）**
+    - shield `copen2_l_standalone`（`config/boards/shields/copen2_l_standalone/`）を
+      通常の `copen2_L` と組み合わせてビルド。**devicetree(L実機の実配線)は一切
+      変更せず**、Kconfigのみ `CONFIG_ZMK_SPLIT_ROLE_CENTRAL=y` + `CONFIG_ZMK_USB=y`
+      を追加し、L基板をBLEペリフェラルではなく**スタンドアロンのUSBキーボード**
+      として動作させる。
+    - 目的: L実機の配線・overlay自体が単体で正しくキー入力を出せるかを、
+      BLE/ペリフェラル接続を完全に排除した状態で検証する
+      （ユーザーが手動で試した「Rファームウェアを左基板に書く」実験を、
+      L自身の正しい配線定義を使う形でより正確に再現）。
+    - **使い方**: `copen2_L_standalone-xiao_ble-zmk` (uf2) をL側にフラッシュ →
+      USBでPCに接続 → テキストエディタを開いてL側の各キーを押す →
+      文字が入力されるか確認（シリアルログ確認より簡単・確実）。
+      対応表は本ドキュメント作成時のチャットlog参照（例: Tキー = row0,col4）。
+      診断後は通常運用の `copen2_L.uf2` に書き戻すこと。
+  - **次のアクション**: 上記 `copen2_L_standalone` の実機テスト結果待ち。
+    - 正しく（または一部でも）入力できれば → L実機の配線・overlay自体は生きている
+      ことが確定し、原因は peripheral role / BLE 側のロジックに完全に絞り込める。
+    - 何も入力されなければ → overlay/devicetree側（col-gpios定義等）に何らかの
+      不具合がある可能性が浮上する。
+    - （保留中）マルチメーターでの導通チェックは、上記の結果を見てから
+      必要に応じて再開する。
 
 ## 完了
 

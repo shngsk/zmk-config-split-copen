@@ -15,3 +15,9 @@ include:
   - board: xiao_ble//zmk
     shield: copen2_L copen2_l_dbg
     artifact-name: copen2_L_dbg-xiao_ble-zmk
+  # Diagnostic-only: left half's real wiring run standalone as a USB
+  # keyboard (central role), bypassing BLE/peripheral pairing entirely.
+  # See TODO.md "左手デバイス" entry for usage instructions.
+  - board: xiao_ble//zmk
+    shield: copen2_L copen2_l_standalone
+    artifact-name: copen2_L_standalone-xiao_ble-zmk

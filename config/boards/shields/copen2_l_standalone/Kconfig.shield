@@ -1,0 +1,2 @@
+config SHIELD_COPEN2_L_STANDALONE
+    def_bool $(shields_list_contains,copen2_l_standalone)

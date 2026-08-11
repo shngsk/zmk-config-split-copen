@@ -1,0 +1,9 @@
+/*
+ * Diagnostic-only shield: intentionally contributes no devicetree changes.
+ * Combine with the "copen2_L" shield in build.yaml so the REAL copen2_L
+ * physical wiring (row/col GPIOs, matrix transform, keymap) is used
+ * unmodified. This shield only adds Kconfig via
+ * copen2_l_standalone.conf, forcing the split "central" role + USB HID
+ * so the left half can be tested as a standalone USB keyboard --
+ * bypassing BLE/peripheral pairing entirely. See TODO.md for usage.
+ */
